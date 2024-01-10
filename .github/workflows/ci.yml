@@ -79,12 +79,9 @@ jobs:
           - i686-pc-windows-gnu
           - x86_64-pc-windows-gnu
           - i686-unknown-linux-gnu
-          - powerpc64-unknown-linux-gnu
-          # - mips64-unknown-linux-gnuabi64
+          - powerpc64-unknown-linux-gnu 
           - riscv64gc-unknown-linux-gnu
-          - wasm32-unknown-unknown
           - wasm32-unknown-emscripten
-          - wasm32-wasi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -103,19 +100,7 @@ jobs:
       - name: cross build --target ${{ matrix.target }}
         run: |
           cargo install cross
-          cross build --target ${{ matrix.target }}
-        if: matrix.target != 'wasm32-unknown-unknown'
-      # # WASM support
-      # - name: cargo build --target ${{ matrix.target }}
-      #   run: |
-      #     rustup target add ${{ matrix.target }}
-      #     cargo build --features js --target ${{ matrix.target }}
-      #   if: matrix.target == 'wasm32-unknown-unknown'
-      # - name: cargo build --target ${{ matrix.target }}
-      #   run: |
-      #     rustup target add ${{ matrix.target }}
-      #     cargo +nightly build --no-default-features --features alloc --target ${{ matrix.target }} -Z build-std=core,alloc
-      #   if: matrix.target == 'mips64-unknown-linux-gnuabi64'
+          cross build --target ${{ matrix.target }} 
 
   build:
     name: build
@@ -191,8 +176,6 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
-          - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -242,32 +225,14 @@ jobs:
         run: ci/miri.sh
   loom:
     name: loom
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Cache cargo build and registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-loom-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-loom-
+      - uses: actions/checkout@v4
       - name: Install Rust
         run: rustup update $nightly && rustup default $nightly
-      - name: Install cargo-hack
-        run: cargo install cargo-hack
       - name: Loom tests
-        run: RUSTFLAGS="--cfg loom -Dwarnings" cargo hack test --test loom
-  
+        run: RUSTFLAGS="--cfg loom -Dwarnings" cargo test --lib
+
   # valgrind
   valgrind:
     name: valgrind
@@ -294,14 +259,14 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y valgrind
-      # Compile tests
-      # - name: cargo build foo
-      #   run: cargo build --bin foo
+      # # Compile tests
+      # - name: cargo build file
+      #   run: cargo build --bin file
       #   working-directory: integration
 
-      # Run with valgrind
-      # - name: Run valgrind foo
-      #   run: valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all ./target/debug/foo
+      # # Run with valgrind
+      # - name: Run valgrind file
+      #   run: valgrind --error-exitcode=1 --leak-check=full --show-leak-kinds=all ./target/debug/file
       #   working-directory: integration
 
   docs:

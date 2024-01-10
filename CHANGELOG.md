@@ -1,7 +1,3 @@
-# UNRELEASED
-
-# 0.1.2 (January 6th, 2022)
+# 0.0.0 (January 10th, 2024)
 
 FEATURES
-
-
